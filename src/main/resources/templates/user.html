@@ -82,10 +82,10 @@
 
     <ul class="nav nav-tabs">
         <li class="nav-item">
-            <a class="nav-link active" href="#">Users table</a>
+            <a class="nav-link active" href="#usersTable" data-toggle="tab">Users table</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" th:if="${#authorization.expression('(hasRole(''ROLE_ADMIN'') and hasRole(''ROLE_USER'')) or hasRole(''ROLE_ADMIN'')')}" data-toggle="modal" data-target="#newUserModal">New User</a>
+            <a class="nav-link" href="#newUser" data-toggle="tab" th:if="${#authorization.expression('(hasRole(''ROLE_ADMIN'') and hasRole(''ROLE_USER'')) or hasRole(''ROLE_ADMIN'')')}">New User</a>
         </li>
     </ul>
 
@@ -93,38 +93,82 @@
         <div style="font-weight: bold; font-size: 1.5em; text-align: left">
             All Users
         </div>
-    <div class="table-container">
-        <table class="table table-bordered table-striped">
-            <thead class="thead-dark">
-            <tr>
-                <th>USERNAME</th>
-                <th>firstName</th>
-                <th>lastName</th>
-                <th>ROLES</th>
-                <th th:if="${#authorization.expression('(hasRole(''ROLE_ADMIN'') and hasRole(''ROLE_USER'')) or hasRole(''ROLE_ADMIN'')')}">Edit</th>
-                <th th:if="${#authorization.expression('(hasRole(''ROLE_ADMIN'') and hasRole(''ROLE_USER'')) or hasRole(''ROLE_ADMIN'')')}">Delete</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="user : ${users}">
-                <td th:text="${user.username}">user</td>
-                <td th:text="${user.firstName}">firstName</td>
-                <td th:text="${user.lastName}">lastName</td>
-                <td th:text="${user.role}">ROLE_USER</td>
-                <td th:if="${#authorization.expression('(hasRole(''ROLE_ADMIN'') and hasRole(''ROLE_USER'')) or hasRole(''ROLE_ADMIN'')')}">
-                    <button class="btn btn-edit btn-sm" data-toggle="modal" data-target="#editUserModal"
-                            th:data-username="${user.username}" th:data-firstName="${user.firstName}" th:data-lastName="${user.lastName}"
-                            th:data-roles="${user.roles}" th:data-allRoles="${allRoles}">Edit</button>
-                </td>
-                <td th:if="${#authorization.expression('(hasRole(''ROLE_ADMIN'') and hasRole(''ROLE_USER'')) or hasRole(''ROLE_ADMIN'')')}">
-                    <button class="btn btn-delete btn-sm" data-toggle="modal" data-target="#deleteUserModal"
-                            th:data-username="${user.username}">Delete</button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+    </form>
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="usersTable">
+            <h5>Таблица пользователей</h5>
+            <div class="table-container">
+                <table class="table table-bordered table-striped">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th>USERNAME</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>ROLES</th>
+                        <th th:if="${#authorization.expression('(hasRole(''ROLE_ADMIN'') and hasRole(''ROLE_USER'')) or hasRole(''ROLE_ADMIN'')')}">Edit</th>
+                        <th th:if="${#authorization.expression('(hasRole(''ROLE_ADMIN'') and hasRole(''ROLE_USER'')) or hasRole(''ROLE_ADMIN'')')}">Delete</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.username}">user</td>
+                        <td th:text="${user.firstName}">firstName</td>
+                        <td th:text="${user.lastName}">lastName</td>
+                        <td>
+                            <span th:each="role : ${user.roles}" th:text="${role.name}">ROLE_USER</span>
+                        </td>
+                        <td th:if="${#authorization.expression('(hasRole(''ROLE_ADMIN'') and hasRole(''ROLE_USER'')) or hasRole(''ROLE_ADMIN'')')}">
+                            <button class="btn btn-edit btn-sm" data-toggle="modal" data-target="#editUserModal"
+                                    th:data-username="${user.username}" th:data-firstName="${user.firstName}"
+                                    th:data-lastName="${user.lastName}" th:data-roles="${user.roles}"
+                                    th:data-allRoles="${allRoles}">Edit</button>
+                        </td>
+                        <td th:if="${#authorization.expression('(hasRole(''ROLE_ADMIN'') and hasRole(''ROLE_USER'')) or hasRole(''ROLE_ADMIN'')')}">
+                            <button class="btn btn-delete btn-sm" data-toggle="modal" data-target="#deleteUserModal"
+                                    th:data-username="${user.username}">Delete</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="newUser">
+            <h5>Добавить нового пользователя</h5>
+            <form th:action="@{/admin/users/save}" method="post">
+                <div class="form-group">
+                    <label for="newUsername">USERNAME:</label>
+                    <input type="text" class="form-control" id="newUsername" name="username" required title="Введите уникальный username"
+                           placeholder="Введите уникальный username" />
+                </div>
+                <div class="form-group">
+                    <label for="newFirstName">First Name:</label>
+                    <input type="text" class="form-control" id="newFirstName" name="firstName" required/>
+                </div>
+                <div class="form-group">
+                    <label for="newLastName">Last Name:</label>
+                    <input type="text" class="form-control" id="newLastName" name="lastName" required/>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">PASSWORD:</label>
+                    <input type="password" class="form-control" id="newPassword" name="password" required placeholder="*********"/>
+                </div>
+                <div class="form-group">
+                    <label>Роли:</label>
+                    <div>
+                        <p th:each="role : ${allRoles}">
+                            <label>
+                                <input type="checkbox" name="roles" th:value="${role.id}" />
+                                <span th:text="${role.name}"></span>
+                            </label>
+                        </p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Сохранить!" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
 <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -139,7 +183,7 @@
                 <form th:action="@{/admin/users/update/{username}(username=${username})}" method="post">
                     <div class="form-group">
                         <label for="editUsername">USERNAME:</label>
-                        <input type="text" class="form-control" id="editUsername" name="username" required />
+                        <input type="text" class="form-control" id="editUsername" name="username" readonly required />
                     </div>
                     <div class="form-group">
                         <label for="editFirstName">FirstName:</label>
@@ -195,53 +239,6 @@
     </div>
 </div>
 
-<div class="modal fade" id="newUserModal" tabindex="-1" role="dialog" aria-labelledby="newUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="newUserModalLabel">Добавить нового пользователя</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form th:action="@{/admin/users/save}" method="post">
-                    <div class="form-group">
-                        <label for="newUsername">USERNAME:</label>
-                        <input type="text" class="form-control" id="newUsername" name="username" required title="Введите уникальный username"
-                               placeholder="Введите уникальный username" />
-                    </div>
-                    <div class="form-group">
-                        <label for="newFirstName">FirstName:</label>
-                        <input type="text" class="form-control" id="newFirstName" name="firstName" required/>
-                    </div>
-                    <div class="form-group">
-                        <label for="newLastName">LastName:</label>
-                        <input type="text" class="form-control" id="newLastName" name="lastName" required/>
-                    </div>
-                    <div class="form-group">
-                        <label for="newPassword">PASSWORD:</label>
-                        <input type="password" class="form-control" id="newPassword" name="password" required placeholder="*********"/>
-                    </div>
-                    <div class="form-group">
-                        <label>Роли:</label>
-                        <div>
-                            <p th:each="role : ${allRoles}">
-                                <label>
-                                    <input type="checkbox" name="roles" th:value="${role.id}" />
-                                    <span th:text="${role.name}"></span>
-                                </label>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <input type="submit" value="Сохранить!" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
