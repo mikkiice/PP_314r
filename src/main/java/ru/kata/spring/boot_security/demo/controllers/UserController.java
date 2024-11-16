@@ -65,7 +65,6 @@ public class UserController {
         return "redirect:/admin";
     }
 
-
     @GetMapping("/admin/users/edit/{username}")
     public ModelAndView editUser(@PathVariable(name = "username") String username) {
         User user = userService.findByUsername(username);
