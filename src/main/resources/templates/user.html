@@ -70,7 +70,8 @@
 <div class="content">
     <div class="navbar">
     <span><strong th:text="${#authentication.name}">USERNAME</strong> with roles:
-      <span th:each="roles : ${#authentication.getAuthorities()}" th:text="${roles} + ' '">WHERE ROLES?</span></span>
+      <span th:each="roles : ${#authentication.getAuthorities()}" th:text="${roles.getAuthority().replace('ROLE_', '')}">WHERE ROLES?</span>
+</span>
         <a href="#" th:href="@{/logout}">Logout</a>
         <div class="sidebar">
             <a th:if="${#authorization.expression('(hasRole(''ROLE_ADMIN'') and hasRole(''ROLE_USER'')) or hasRole(''ROLE_ADMIN'')')}" th:classappend="${currentPath == '/admin'} ? 'active'" th:href="@{/admin}">Admin</a>
@@ -116,7 +117,7 @@
                         <td th:text="${user.firstName}">firstName</td>
                         <td th:text="${user.lastName}">lastName</td>
                         <td>
-                            <span th:each="role : ${user.roles}" th:text="${role.name}">ROLE_USER</span>
+                            <span th:each="role, iterStat : ${user.roles}" th:text="${(iterStat.index > 0 ? ' ' : '') + role.name.replace('ROLE_', '').replace('_', ' ')}"></span>
                         </td>
                         <td th:if="${#authorization.expression('(hasRole(''ROLE_ADMIN'') and hasRole(''ROLE_USER'')) or hasRole(''ROLE_ADMIN'')')}">
                             <button class="btn btn-edit btn-sm" data-toggle="modal" data-target="#editUserModal"
@@ -158,7 +159,7 @@
                         <p th:each="role : ${allRoles}">
                             <label>
                                 <input type="checkbox" name="roles" th:value="${role.id}" />
-                                <span th:text="${role.name}"></span>
+                                <span th:text="${role.name.replace('ROLE_','')}"></span>
                             </label>
                         </p>
                     </div>
@@ -203,10 +204,11 @@
                             <p th:each="role : ${allRoles}">
                                 <label>
                                     <input type="checkbox" name="roles" th:value="${role.id}"/>
-                                    <span th:text="${role.name}"></span>
+                                    <span th:text="${role.name.replace('ROLE_', '')}"></span>
                                 </label>
                             </p>
                         </div>
+
                     </div>
                     <div class="form-group">
                         <input type="submit" value="Сохранить!" class="btn btn-primary" />
@@ -267,7 +269,6 @@
         $('#deleteUserModal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
             var username = button.data('username');
-
             var modal = $(this);
             modal.find('#deleteUsername').text(username);
             $('#deleteUserForm').attr('action', '/admin/users/delete/' + username);

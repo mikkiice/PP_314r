@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
-import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
+import ru.kata.spring.boot_security.demo.services.RoleService;
 import ru.kata.spring.boot_security.demo.services.UserService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,12 +18,12 @@ import java.util.List;
 @Controller
 public class UserController {
     private final UserService userService;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
 
-    public UserController(UserService userService, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public UserController(UserService userService, PasswordEncoder passwordEncoder, RoleService roleService) {
         this.passwordEncoder = passwordEncoder;
-        this.roleRepository = roleRepository;
+        this.roleService = roleService;
         this.userService = userService;
     }
 
@@ -31,8 +31,7 @@ public class UserController {
     public String showAllUsersFromAdmin(Model model, HttpServletRequest request) {
         model.addAttribute("users", userService.findAllUsers());
         model.addAttribute("currentPath", request.getRequestURI());
-        List<Role> roles = (List<Role>) roleRepository.findAll();
-        model.addAttribute("allRoles", roles);
+        model.addAttribute("allRoles", roleService.findAll());
         return "user";
     }
 
@@ -49,8 +48,7 @@ public class UserController {
         User user = new User();
         ModelAndView mav = new ModelAndView();
         mav.addObject("user", user);
-        List<Role> roles = roleRepository.findAll();
-        mav.addObject("allRoles", roles);
+        mav.addObject("allRoles", roleService.findAll());
         return mav;
     }
 
@@ -73,15 +71,14 @@ public class UserController {
         User user = userService.findByUsername(username);
         ModelAndView mav = new ModelAndView();
         mav.addObject("user", user);
-        List<Role> roles = roleRepository.findAll();
-        mav.addObject("allRoles", roles);
+        mav.addObject("allRoles", roleService.findAll());
         List<Role> userRoles = (List<Role>) user.getRoles();
         mav.addObject("userRoles", userRoles);
         return mav;
     }
 
     @RequestMapping(value = "/admin/users/update/{username}", method = RequestMethod.POST)
-    public String updateUserAfterWriting(@PathVariable String username, @ModelAttribute("user") User user, Model model) {
+    public String updateUser(@PathVariable String username, @ModelAttribute("user") User user) {
         User user1 = userService.findByUsername(user.getUsername());
         user1.setUsername(username);
         user1.setId(userService.findByUsername(username).getId());
@@ -89,8 +86,6 @@ public class UserController {
         user1.setFirstName(user.getFirstName());
         user1.setLastName(user.getLastName());
         user1.setPassword(passwordEncoder.encode(user.getPassword()));
-//        List<Role> roles = (List<Role>) roleRepository.findAll();
-//        model.addAttribute("allOfRoles", roles);
         userService.updateUser(user1);
         return "redirect:/admin";
     }

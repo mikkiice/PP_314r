@@ -1,16 +1,14 @@
 package ru.kata.spring.boot_security.demo.services;
 
 
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import ru.kata.spring.boot_security.demo.dao.UserDao;
+import ru.kata.spring.boot_security.demo.dao.UserRepository;
 import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
-import ru.kata.spring.boot_security.demo.repositories.UserRepository;
 
 import javax.transaction.Transactional;
 import java.util.Collection;
@@ -20,14 +18,10 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
 
-
-
     private final UserRepository userRepository;
-    private final UserDao userDao;
 
-    public UserServiceImpl(UserRepository userRepository, UserDao userDao) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.userDao = userDao;
     }
 
     @Override
@@ -44,7 +38,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByUsername(String username) {
-        return userDao.getUserByUsername(username);
+        return userRepository.findByUsername(username);
     }
 
     @Override
@@ -53,41 +47,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void saveUser(User user) {
-        userDao.saveUser(user);
+        userRepository.save(user);
     }
 
     @Override
+    @Transactional
     public void updateUser(User user) {
-        userDao.updateUser(user);
+        userRepository.save(user);
     }
 
     @Override
-    public void deleteUser(Long id) {
-        userDao.deleteUser(id);
-    }
-
-    @Override
+    @Transactional
     public void deleteByUsername(String username) {
-        userDao.deleteByUsername(username);
-    }
-
-    @Override
-    public User findById(Long id) {
-        return userDao.getUserById(id);
-    }
-    @Override
-    public boolean existsByUsername(String username) {
-        return userDao.getUserByUsername(username) != null;
-    }
-
-    @Override
-    public String getRoleNamesByUsername(String username) {
-        return userDao.getRolesByUsername(username);
+        userRepository.deleteByUsername(username);
     }
 
     @Override
     public List<User> findAllUsers() {
-        return userDao.getAllUsers();
+        return userRepository.findAll();
     }
 }
