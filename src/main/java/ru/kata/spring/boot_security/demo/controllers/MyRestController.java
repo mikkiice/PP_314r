@@ -46,7 +46,7 @@ public class MyRestController {
     }
     @PostMapping("/{id}")
     public ResponseEntity<HttpStatus> updateUser(@PathVariable Long id, @RequestBody @Valid User user) {
-        user.setId(id);
+        user.setId(userService.findById(id).getId());
         user.setFirstName(user.getFirstName());
         user.setLastName(user.getLastName());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
