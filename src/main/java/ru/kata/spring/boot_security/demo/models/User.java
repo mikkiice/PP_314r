@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -31,6 +32,8 @@ public class User implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     Collection<Role> roles;
+    @Transient
+    private List<String> roleNames;
 
     public User(Long id, String username, String password, Set<Role> roles) {
         this.id = id;
@@ -86,6 +89,14 @@ public class User implements UserDetails {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public List<String> getRoleNames() {
+        return roleNames;
+    }
+
+    public void setRoleNames(List<String> roleNames) {
+        this.roleNames = roleNames;
     }
 
     @Override
