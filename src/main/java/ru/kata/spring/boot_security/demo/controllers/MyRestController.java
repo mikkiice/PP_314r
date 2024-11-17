@@ -11,10 +11,11 @@ import ru.kata.spring.boot_security.demo.services.RoleService;
 import ru.kata.spring.boot_security.demo.services.UserService;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api")
 public class MyRestController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
@@ -26,16 +27,19 @@ public class MyRestController {
         this.roleService = roleService;
     }
 
-    @GetMapping
-    public List<User> showAllUsers() {
-        return userService.findAllUsers();
-    }
-    @GetMapping("/{id}")
-    public User showUser(@PathVariable Long id) {
-        return userService.findById(id);
+    @GetMapping("/admin")
+    public ResponseEntity<List<User>> showAllUsers() {
+        return ResponseEntity.ok(userService.findAllUsers());
     }
 
-    @PostMapping
+    @GetMapping("/users/{id}")
+    public ResponseEntity<User> showUser(@PathVariable Long id, Principal principal) {
+        String username = principal.getName();
+        User user = userService.findById(id);
+        return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/admin/users/new")
     public ResponseEntity<HttpStatus> createUser(@RequestBody @Valid User user) {
         user.setUsername(user.getUsername());
         user.setFirstName(user.getFirstName());
@@ -44,7 +48,7 @@ public class MyRestController {
         userService.saveUser(user);
         return ResponseEntity.ok(HttpStatus.CREATED);
     }
-    @PostMapping("/{id}")
+    @PostMapping("/admin/users/update/{id}")
     public ResponseEntity<HttpStatus> updateUser(@PathVariable Long id, @RequestBody @Valid User user) {
         user.setId(userService.findById(id).getId());
         user.setFirstName(user.getFirstName());
@@ -53,7 +57,7 @@ public class MyRestController {
         userService.updateUser(user);
         return ResponseEntity.ok(HttpStatus.OK);
     }
-    @PostMapping("/{id}")
+    @PostMapping("/admin/users/delete/{id}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable Long id) {
         userService.deleteById(id);
         return ResponseEntity.ok(HttpStatus.OK);
