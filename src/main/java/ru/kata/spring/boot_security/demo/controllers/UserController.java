@@ -1,17 +1,17 @@
 package ru.kata.spring.boot_security.demo.controllers;
 
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.services.UserService;
 
 
-@Controller
+@RestController
+@RequestMapping("/api/user")
 public class UserController {
+
     private final UserService userService;
 
 
@@ -19,14 +19,10 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping({ "/user"})
-    public String showAllUsersFromUser(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        User currentUser = userService.findByUsername(userDetails.getUsername());
-        model.addAttribute("currentPath", currentUser);
-
-        return "rest";
+    @GetMapping
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return userService.findByUsername(username);
     }
-
-
 }
-
